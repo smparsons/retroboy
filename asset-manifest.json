@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.js": "/retroboy/static/js/main.b20a44f6.js",
+    "main.js": "/retroboy/static/js/main.f6c26d85.js",
     "static/js/453.7e84896c.chunk.js": "/retroboy/static/js/453.7e84896c.chunk.js",
     "static/media/retroboyCore_bg.wasm": "/retroboy/static/media/retroboyCore_bg.a98b2047330b69fc508e.wasm",
     "index.html": "/retroboy/index.html",
-    "main.b20a44f6.js.map": "/retroboy/static/js/main.b20a44f6.js.map",
+    "main.f6c26d85.js.map": "/retroboy/static/js/main.f6c26d85.js.map",
     "453.7e84896c.chunk.js.map": "/retroboy/static/js/453.7e84896c.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.b20a44f6.js"
+    "static/js/main.f6c26d85.js"
   ]
 }
