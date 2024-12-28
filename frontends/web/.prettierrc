@@ -1,0 +1,8 @@
+{
+    "arrowParens": "avoid",
+    "semi": true,
+    "tabWidth": 4,
+    "importOrder": ["^~(.*)$", "^./(.*)$", "^../(.*)$", "^../../(.*)$"],
+    "importOrderSeparation": true,
+    "plugins": ["@trivago/prettier-plugin-sort-imports"]
+}
