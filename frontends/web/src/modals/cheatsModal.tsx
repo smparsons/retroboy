@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Button, Checkbox, styled, Typography } from "@mui/material";
 
 import AddCheatModal from "./addCheatModal";
@@ -208,7 +209,9 @@ export const CheatsModal = ({
                                             key: "delete",
                                         },
                                     ]}
-                                />
+                                >
+                                    <MoreVertIcon fontSize="small" />
+                                </MenuButton>
                             </ListItemGrid>
                         ))}
                     </ListGrid>

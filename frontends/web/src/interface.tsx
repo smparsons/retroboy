@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { FileBufferObject } from "./components/bufferFileUpload";
 import { gameBoyModes } from "./components/modeSwitch";
 import {
+    decodeEmulatorState,
     EmulatorSettings,
+    encodeEmulatorState,
     initializeEmulator,
     registerGamegenieCheat,
     registerGamesharkCheat,
@@ -197,6 +199,49 @@ const Interface = (): JSX.Element => {
         }
     };
 
+    const importSaveState = (): void => {
+        if (gameKey) {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".rbs";
+            input.onchange = async () => {
+                const file = input.files?.[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        const error = decodeEmulatorState(
+                            new Uint8Array(reader.result as ArrayBuffer),
+                        );
+                        if (error) {
+                            openErrorDialog(error);
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            };
+            input.click();
+        }
+    };
+
+    const exportSaveState = (): void => {
+        if (gameKey) {
+            const result = encodeEmulatorState();
+            if (result.error) {
+                openErrorDialog(result.error);
+            } else if (result.saveState) {
+                const blob = new Blob([result.saveState], {
+                    type: "application/octet-stream",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "save_state.rbs";
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+    };
+
     useEffect(() => {
         if (playing && !fullscreenMode && isMobile) {
             setTimeout(() => {
@@ -241,6 +286,8 @@ const Interface = (): JSX.Element => {
             onScreenshot={downloadScreenshot}
             onOpenControls={openControls}
             onOpenCheats={openCheats}
+            onImportSaveState={importSaveState}
+            onExportSaveState={exportSaveState}
             canvasRef={canvasRef}
         />
     );
