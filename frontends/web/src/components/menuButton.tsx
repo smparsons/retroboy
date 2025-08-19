@@ -88,11 +88,13 @@ export const MenuButton = ({
         </MenuItem>
     );
 
+    const filteredItems = menuItems.filter(item => item.visible ?? true);
+
     const openMobileMenu = (): void => {
         displayTopLevelComponent(
             mobileMenuKey,
             <MobileMenu
-                menuItems={menuItems}
+                menuItems={filteredItems}
                 title={mobileMenuTitle ?? "Menu"}
                 onClose={() => removeTopLevelComponent(mobileMenuKey)}
             />,
@@ -109,7 +111,7 @@ export const MenuButton = ({
                 onClose={handleClose}
                 anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
             >
-                {menuItems.map(asMenuItemElement)}
+                {filteredItems.map(asMenuItemElement)}
             </Menu>
         </>
     );
@@ -120,6 +122,7 @@ export interface MenuItemInfo {
     icon?: React.ReactNode;
     action: () => void;
     key?: string;
+    visible?: boolean;
 }
 
 interface MobileMenuProps {

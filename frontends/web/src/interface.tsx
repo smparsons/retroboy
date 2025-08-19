@@ -23,12 +23,15 @@ import { CheatType } from "./modals/cheatsModal";
 import { CheatsModal } from "./modals/cheatsModal";
 import { ControlsModal } from "./modals/controlsModal";
 import { MessageDialog } from "./modals/dialog";
+import { ImportBackupModal } from "./modals/importBackupModal";
+import { buildImportOptionsFromBackupJson } from "./modals/importOptionsLogic";
 import FullscreenView from "./views/fullscreenView";
 import StandardView from "./views/standardView";
 
 const errorModalKey = "error-modal";
 const controlsModalKey = "controls-modal";
 const cheatsModalKey = "cheats-modal";
+const importBackupModalKey = "import-backup-modal";
 
 const Interface = (): JSX.Element => {
     const isMobile = useIsMobile();
@@ -49,6 +52,7 @@ const Interface = (): JSX.Element => {
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const loadStateRef = useRef<HTMLInputElement>(null);
+    const importBackupRef = useRef<HTMLInputElement>(null);
 
     const resetGame = (): void => {
         setGameKey(null);
@@ -200,14 +204,40 @@ const Interface = (): JSX.Element => {
             );
         }
     };
-
-    const handleLoadStateChange = async (
+    const handleFileUpload = async (
         event: React.ChangeEvent<HTMLInputElement>,
+        fileUploadRef: React.RefObject<HTMLInputElement>,
+        callback: (file: File) => Promise<void>,
     ): Promise<void> => {
         const fileList = event.target.files;
         if (!fileList) return;
         const file = fileList[0];
         if (file) {
+            await callback(file);
+            if (fileUploadRef.current) {
+                fileUploadRef.current.value = "";
+            }
+        }
+    };
+
+    const downloadFile = (
+        content: BlobPart,
+        filename: string,
+        mimeType: string,
+    ): void => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleLoadStateChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ): Promise<void> => {
+        return handleFileUpload(event, loadStateRef, async (file: File) => {
             try {
                 const bufferObject = await buildFileBufferObject(file);
                 const error = applySaveState(bufferObject.data);
@@ -220,11 +250,7 @@ const Interface = (): JSX.Element => {
                 );
                 console.error("Error loading save state:", err);
             }
-
-            if (loadStateRef.current) {
-                loadStateRef.current.value = "";
-            }
-        }
+        });
     };
 
     const saveState = (): void => {
@@ -233,18 +259,74 @@ const Interface = (): JSX.Element => {
             if (result.error) {
                 openErrorDialog(result.error);
             } else if (result.saveState) {
-                const blob = new Blob([result.saveState], {
-                    type: "application/octet-stream",
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
                 const saveStateName = rom.filename.split(".")[0];
                 const filename = `${saveStateName}.rbs`;
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(url);
+                downloadFile(
+                    result.saveState,
+                    filename,
+                    "application/octet-stream",
+                );
             }
+        }
+    };
+
+    const openImportBackup = (backupJson: Record<string, unknown>): void => {
+        setUsingModal(true);
+        const importOptions = buildImportOptionsFromBackupJson(backupJson);
+        if (!importOptions.length) {
+            openErrorDialog("This JSON file has no valid data to import.");
+        } else {
+            displayTopLevelComponent(
+                importBackupModalKey,
+                <ImportBackupModal
+                    onClose={() => {
+                        removeTopLevelComponent(importBackupModalKey);
+                        setUsingModal(false);
+                    }}
+                    importOptions={importOptions}
+                    backupJson={backupJson}
+                />,
+            );
+        }
+    };
+
+    const handleImportBackupChange = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ): Promise<void> => {
+        return handleFileUpload(event, importBackupRef, async (file: File) => {
+            try {
+                const text = await file.text();
+                const jsonData = JSON.parse(text) as Record<string, unknown>;
+                openImportBackup(jsonData);
+            } catch (err) {
+                openErrorDialog(
+                    "Invalid JSON file. Please select a valid backup file.",
+                );
+                console.error("Error parsing JSON:", err);
+            }
+        });
+    };
+
+    const exportBackup = (): void => {
+        const backupData: Record<string, unknown> = {};
+
+        if (!localStorage.length) {
+            openErrorDialog("You currently have no stored settings to export.");
+        } else {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    const value = localStorage.getItem(key);
+                    backupData[key] = value;
+                }
+            }
+
+            const jsonString = JSON.stringify(backupData, null, 2);
+            downloadFile(
+                jsonString,
+                "retroboy-backup.json",
+                "application/json",
+            );
         }
     };
 
@@ -294,8 +376,11 @@ const Interface = (): JSX.Element => {
             onOpenCheats={openCheats}
             onLoadStateChange={handleLoadStateChange}
             onSaveState={saveState}
+            onImportBackupChange={handleImportBackupChange}
+            onExportBackup={exportBackup}
             canvasRef={canvasRef}
             loadStateRef={loadStateRef}
+            importBackupRef={importBackupRef}
         />
     );
 };
