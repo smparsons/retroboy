@@ -271,11 +271,11 @@ const Interface = (): JSX.Element => {
     };
 
     const openImportBackup = (backupJson: Record<string, unknown>): void => {
-        setUsingModal(true);
         const importOptions = buildImportOptionsFromBackupJson(backupJson);
         if (!importOptions.length) {
             openErrorDialog("This JSON file has no valid data to import.");
         } else {
+            setUsingModal(true);
             displayTopLevelComponent(
                 importBackupModalKey,
                 <ImportBackupModal
