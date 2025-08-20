@@ -82,9 +82,7 @@ export const ImportBackupModal = ({
             onSubmit={({ values }) => handleSend(onClose, values)}
         >
             <Typography variant="body1">
-                Please choose which settings from the backup to import. If you
-                already have these settings stored in your browser, they will be
-                overwritten by the items you selected.
+                Please choose which settings from the backup to import.
             </Typography>
             <ListGrid isMobile={isMobile}>
                 {importOptions.map(([key, value]) => (
