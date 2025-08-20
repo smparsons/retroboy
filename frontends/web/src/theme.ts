@@ -41,7 +41,7 @@ const theme = createTheme({
         MuiTypography: {
             styleOverrides: {
                 root: {
-                    lineHeight: 1.5,
+                    lineHeight: 1,
                 },
             },
         },

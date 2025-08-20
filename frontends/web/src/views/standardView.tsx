@@ -7,6 +7,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import SettingsIcon from "@mui/icons-material/Settings";
 import VideogameAssetIcon from "@mui/icons-material/VideogameAsset";
 import { Button, Typography, styled, Divider } from "@mui/material";
 import { RefObject } from "react";
@@ -67,8 +68,11 @@ const StandardView = ({
     onRomChange,
     onLoadStateChange,
     onSaveState,
+    onImportBackupChange,
+    onExportBackup,
     canvasRef,
     loadStateRef,
+    importBackupRef,
 }: StandardViewProps): JSX.Element => {
     const breakpoint = useResponsiveBreakpoint();
 
@@ -85,6 +89,12 @@ const StandardView = ({
                 accept=".rbs"
                 ref={loadStateRef}
                 onChange={onLoadStateChange}
+            />
+            <HiddenInput
+                type="file"
+                accept=".json"
+                ref={importBackupRef}
+                onChange={onImportBackupChange}
             />
             <CssGrid
                 gap={isTablet || isMobile ? GapSize.large : GapSize.giant}
@@ -115,16 +125,42 @@ const StandardView = ({
                             alignItems={Position.center}
                         >
                             <Logo />
-                            {!isMobile && !isTablet && (
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    startIcon={<GamepadIcon />}
-                                    onClick={onOpenControls}
-                                >
-                                    Controls
-                                </Button>
-                            )}
+                            <MenuButton
+                                variant="contained"
+                                color="secondary"
+                                startIcon={<SettingsIcon />}
+                                withMobileMenu={true}
+                                mobileMenuTitle="Settings"
+                                menuItems={[
+                                    {
+                                        display: "Controls",
+                                        icon: <GamepadIcon fontSize="small" />,
+                                        action: onOpenControls,
+                                        key: "controls",
+                                        visible: !isMobile && !isTablet,
+                                    },
+                                    {
+                                        display: "Import Backup",
+                                        icon: (
+                                            <FileUploadIcon fontSize="small" />
+                                        ),
+                                        action: () => {
+                                            openFileDialog(importBackupRef);
+                                        },
+                                        key: "import-backup",
+                                    },
+                                    {
+                                        display: "Export Backup",
+                                        icon: (
+                                            <FileDownloadIcon fontSize="small" />
+                                        ),
+                                        action: onExportBackup,
+                                        key: "export-backup",
+                                    },
+                                ]}
+                            >
+                                Settings
+                            </MenuButton>
                             <MenuButton
                                 variant="contained"
                                 color="secondary"
@@ -284,8 +320,13 @@ interface StandardViewProps {
         event: React.ChangeEvent<HTMLInputElement>,
     ) => Promise<void>;
     readonly onSaveState: () => void;
+    readonly onImportBackupChange: (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => Promise<void>;
+    readonly onExportBackup: () => void;
     readonly canvasRef: RefObject<HTMLCanvasElement>;
     readonly loadStateRef: RefObject<HTMLInputElement>;
+    readonly importBackupRef: RefObject<HTMLInputElement>;
 }
 
 export default StandardView;
