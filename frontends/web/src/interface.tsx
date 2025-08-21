@@ -262,7 +262,7 @@ const Interface = (): JSX.Element => {
                 const saveStateName = rom.filename.split(".")[0];
                 const filename = `${saveStateName}.rbs`;
                 downloadFile(
-                    result.saveState,
+                    result.saveState.buffer as ArrayBuffer,
                     filename,
                     "application/octet-stream",
                 );
