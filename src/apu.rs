@@ -61,7 +61,6 @@ pub struct Apu {
 }
 
 pub struct ApuParams {
-    pub in_color_bios: bool,
     pub divider: u8
 }
 
@@ -234,48 +233,37 @@ impl Apu {
         self.right_sample_queue.push(right_sample);
     }
 
-    fn enqueue_audio_samples(&mut self, in_color_bios: bool) {
-        /*
-            This emulator uses audio syncing. It steps the emulator until the audio buffer is full, then 
-            briefly pauses while it plays the audio in the buffer. Once the audio plays, the emulator
-            resumes.
-            
-            The purpose of the BIOS check here is that I want my emulator to speed through the
-            initial GBC BIOS so it appears as if it's skipping the BIOS altogether (even though it still
-            runs it; it's just hidden).
-        */
-        if !in_color_bios {
-            let t_cycle_increment = get_t_cycle_increment(self.cgb_double_speed);
+    fn enqueue_audio_samples(&mut self) {
+        let t_cycle_increment = get_t_cycle_increment(self.cgb_double_speed);
 
-            self.audio_buffer_clock += t_cycle_increment;
-            let steps_since_enqueue = self.audio_buffer_clock / t_cycle_increment;
-            let steps_per_enqueue = self.enqueue_rate as u8 + 1 / t_cycle_increment;
+        self.audio_buffer_clock += t_cycle_increment;
+        let steps_since_enqueue = self.audio_buffer_clock / t_cycle_increment;
+        let steps_per_enqueue = self.enqueue_rate as u8 + 1 / t_cycle_increment;
 
-            let weight = calculate_sample_weight(steps_per_enqueue, steps_since_enqueue);
-            self.track_digital_outputs(weight);
+        let weight = calculate_sample_weight(steps_per_enqueue, steps_since_enqueue);
+        self.track_digital_outputs(weight);
 
-            if self.audio_buffer_clock as u32 >= self.enqueue_rate {
-                self.audio_buffer_clock = 0;
+        if self.audio_buffer_clock as u32 >= self.enqueue_rate {
+            self.audio_buffer_clock = 0;
 
-                let channel1_dac_output = generate_dac_output(self.summed_channel1_sample, steps_since_enqueue);
-                let channel2_dac_output = generate_dac_output(self.summed_channel2_sample, steps_since_enqueue);
-                let channel3_dac_output = generate_dac_output(self.summed_channel3_sample, steps_since_enqueue);
-                let channel4_dac_output = generate_dac_output(self.summed_channel4_sample, steps_since_enqueue);
+            let channel1_dac_output = generate_dac_output(self.summed_channel1_sample, steps_since_enqueue);
+            let channel2_dac_output = generate_dac_output(self.summed_channel2_sample, steps_since_enqueue);
+            let channel3_dac_output = generate_dac_output(self.summed_channel3_sample, steps_since_enqueue);
+            let channel4_dac_output = generate_dac_output(self.summed_channel4_sample, steps_since_enqueue);
 
-                self.enqueue_left_sample(
-                    channel1_dac_output,
-                    channel2_dac_output,
-                    channel3_dac_output,
-                    channel4_dac_output);
+            self.enqueue_left_sample(
+                channel1_dac_output,
+                channel2_dac_output,
+                channel3_dac_output,
+                channel4_dac_output);
 
-                self.enqueue_right_sample(
-                    channel1_dac_output,
-                    channel2_dac_output,
-                    channel3_dac_output,
-                    channel4_dac_output);
+            self.enqueue_right_sample(
+                channel1_dac_output,
+                channel2_dac_output,
+                channel3_dac_output,
+                channel4_dac_output);
 
-                self.clear_summed_samples();
-            }
+            self.clear_summed_samples();
         }
     }
 
@@ -296,7 +284,7 @@ impl Apu {
 
             self.step_div_apu(params.divider);
         }
-        self.enqueue_audio_samples(params.in_color_bios);
+        self.enqueue_audio_samples();
 
         self.last_divider_time = params.divider;
     }

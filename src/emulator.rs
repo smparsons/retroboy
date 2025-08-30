@@ -32,10 +32,6 @@ impl Emulator {
         self.cpu.address_bus_mut()
     }
 
-    pub fn in_color_bios(&self) -> bool {
-        self.address_bus().in_bios() && self.address_bus().cgb_mode()
-    }
-
     pub fn load_rom(&mut self, rom: &[u8], cartridge_effects: Box<dyn CartridgeEffects>) -> Result<CartridgeHeader> {
         let buffer = rom.to_vec();
         self.address_bus_mut().load_rom_buffer(buffer, cartridge_effects) 

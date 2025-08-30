@@ -74,7 +74,6 @@ pub struct Gpu {
 
 pub struct GpuParams<'a> {
     pub(crate) hdma: &'a mut HDMAState,
-    pub(crate) in_color_bios: bool,
 }
 
 const OAM_MODE: u8 = 2;
@@ -182,9 +181,7 @@ impl Gpu {
                         self.mode_clock = 0;
                         self.update_mode(HBLANK_MODE);
                         params.hdma.set_hblank_started(true);
-                        if !params.in_color_bios {
-                            self.write_scanline();
-                        }
+                        self.write_scanline();
                      }
                 }
                 HBLANK_MODE => {

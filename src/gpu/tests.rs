@@ -10,7 +10,6 @@ fn initialize_test_gpu() -> Gpu {
 fn step_gpu(gpu: &mut Gpu) {
     gpu.step(GpuParams {
         hdma: &mut HDMAState::new(),
-        in_color_bios: false
     });
 }
 

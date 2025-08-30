@@ -166,16 +166,12 @@ impl AddressBus {
     }
 
     pub(super) fn sync(&mut self) {
-        let in_color_bios = self.in_bios && self.cgb_mode;
-
         self.timers.step();
         self.dma_step();
         self.gpu.step(GpuParams {
             hdma: &mut self.hdma,
-            in_color_bios,
         });
         self.apu.step(ApuParams {
-            in_color_bios,
             divider: self.timers.divider(),
         });
         self.serial.step();
