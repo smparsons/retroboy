@@ -28,7 +28,7 @@ jobs:
         run: cargo test --verbose
 
       - name: Build wasm
-        run: sh ./build-wasm.sh
+        run: make build-wasm
 
       - name: Set node.js 16.x
         uses: actions/setup-node@v3
