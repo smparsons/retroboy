@@ -28,7 +28,7 @@ Retro Boy is a cycle-accurate Game Boy emulator written in Rust. It uses `wasm-p
 
 ## How to Compile to WebAssembly
 
-To compile the implementation to WebAssembly, you will first need to install wasm-pack with the command `cargo install wasm-pack` if you haven't done so already. Then, run `sh ./build-wasm.sh` to build the core project and generate the Javascript binding code in the web frontend directory.
+To compile the implementation to WebAssembly, you will first need to install wasm-pack with the command `cargo install wasm-pack` if you haven't done so already. Then, run `make build-wasm` to build the core project and generate the Javascript binding code in the web frontend directory.
 
 ## Web Frontend
 
@@ -40,6 +40,48 @@ To run the web frontend:
 2. When the binding code is generated, it will be added to the frontends/web/src/core directory.
 3. Run `yarn install` in the frontends/web directory to install all dependencies.
 4. Run `yarn start` in the same directory to run the application locally.
+
+## SDL Frontend (Test App)
+
+I created an alternative frontend using the sdl2 library that allows using the emulator without having to go to the web
+app. It's purpose is to make testing a little simpler. The Makefile has different commands to startup the test app:
+
+```
+# Run commands
+$ make sdl-run                             # Run with file dialog to pick game
+$ make sdl-run ROM=path/to/rom.gb          # Run with specific ROM
+$ make sdl-run ROM=path/to/rom.gb CGB=1    # Run with ROM in CGB mode
+$ make sdl-run-cgb ROM=path/to/rom.gb      # Same as above CGB command
+
+# Watch commands
+$ make sdl-watch                           # Watch with file dialog to pick game
+$ make sdl-watch ROM=path/to/rom.gb        # Watch with specific ROM
+$ make sdl-watch ROM=path/to/rom.gb CGB=1  # Watch in CGB mode
+$ make sdl-watch-cgb ROM=path/to/rom.gb    # Same as above CGB command
+```
+
+You can pass your ROM filepath to the command if you'd like, otherwise the app will display a file dialog where you can pick the game you want to select.
+
+The watch commands allow faster debugging, because when you change one of the Rust files, it will automatically re-build and re-run the test app. If you want to use a watach command, I'd recommend passing a specific ROM path, otherwise after every rebuild it will show a file dialog and ask you to pick a game.
+
+Note that if you are using a Mac and you install the SDL library on your machine via `brew`, you may have problems with the linker when you try to build and run the SDL frontend. Exporting the following paths may help you to solve the problem (I put these in my .zshenv file in my home folder):
+
+```
+export LIBRARY_PATH="/opt/homebrew/lib:$LIBRARY_PATH"
+export CPATH="/opt/homebrew/include:$CPATH"
+```
+
+I have not tried running the test app on a Windows machine or a Linux machine, so I am not sure what kinds of problems could happen there.
+
+The control mappings for the test app are as follows:
+
+| Keyboard Key | Game Boy Button |
+| ------------ | --------------- |
+| Arrow Keys   | D-Pad           |
+| Z            | A               |
+| X            | B               |
+| Enter        | Start           |
+| Space        | Select          |
 
 ## Screenshots
 

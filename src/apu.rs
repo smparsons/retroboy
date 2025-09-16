@@ -236,7 +236,7 @@ impl Apu {
     fn enqueue_audio_samples(&mut self) {
         let t_cycle_increment = get_t_cycle_increment(self.cgb_double_speed);
 
-        self.audio_buffer_clock += t_cycle_increment;
+        self.audio_buffer_clock = self.audio_buffer_clock.wrapping_add(t_cycle_increment);
         let steps_since_enqueue = self.audio_buffer_clock / t_cycle_increment;
         let steps_per_enqueue = self.enqueue_rate as u8 + 1 / t_cycle_increment;
 
@@ -269,7 +269,7 @@ impl Apu {
 
     pub(super) fn step(&mut self, params: ApuParams) {
         let t_cycle_increment = get_t_cycle_increment(self.cgb_double_speed);
-        self.channel_clock += t_cycle_increment;
+        self.channel_clock = self.channel_clock.wrapping_add(t_cycle_increment);
 
         if self.enabled {
             if self.channel_clock >= CHANNEL_STEP_RATE {

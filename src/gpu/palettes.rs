@@ -161,7 +161,7 @@ impl Palettes {
         let should_auto_increment = is_bit_set(self.cgb_bcps, 7);
         
         self.cgb_bcps = if should_auto_increment {
-            (self.cgb_bcps + 1) | 0x80
+            (self.cgb_bcps.wrapping_add(1)) | 0x80
         }
         else {
             self.cgb_bcps
@@ -185,7 +185,7 @@ impl Palettes {
         let should_auto_increment = is_bit_set(self.cgb_ocps, 7);
 
         self.cgb_ocps = if should_auto_increment {
-            (self.cgb_ocps + 1) | 0x80
+            (self.cgb_ocps.wrapping_add(1)) | 0x80
         }
         else {
             self.cgb_ocps
