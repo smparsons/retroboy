@@ -62,7 +62,7 @@ $ make sdl-watch-cgb ROM=path/to/rom.gb    # Same as above CGB command
 
 You can pass your ROM filepath to the command if you'd like, otherwise the app will display a file dialog where you can pick the game you want to select.
 
-The watch commands allow faster debugging, because when you change one of the Rust files, it will automatically re-build and re-run the test app. If you want to use a watach command, I'd recommend passing a specific ROM path, otherwise after every rebuild it will show a file dialog and ask you to pick a game.
+The watch commands allow faster debugging, because when you change one of the Rust files, it will automatically re-build and re-run the test app. If you want to use a watch command, I'd recommend passing a specific ROM path, otherwise after every rebuild it will show a file dialog and ask you to pick a game.
 
 Note that if you are using a Mac and you install the SDL library on your machine via `brew`, you may have problems with the linker when you try to build and run the SDL frontend. Exporting the following paths may help you to solve the problem (I put these in my .zshenv file in my home folder):
 
