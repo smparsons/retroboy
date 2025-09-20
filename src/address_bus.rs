@@ -215,7 +215,7 @@ impl AddressBus {
         if self.joypad.interrupt() {
             flags |= 0x10;
         }
-        flags
+        flags | 0xE0
     }
 
     pub(super) fn set_interrupt_flags(&mut self, flags: u8) {
