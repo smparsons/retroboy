@@ -212,7 +212,7 @@ fn reads_from_interrupts_enabled_register() {
 #[test]
 fn reads_from_interrupt_flags_register() {
     let address_bus = setup_test_address_bus();
-    assert_eq!(address_bus.read_byte(0xFF0F), 0xA);
+    assert_eq!(address_bus.read_byte(0xFF0F), 0xEA);
 }
 
 #[test]
