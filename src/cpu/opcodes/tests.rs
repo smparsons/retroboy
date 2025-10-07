@@ -1312,10 +1312,7 @@ fn halts_the_cpu_until_interrupt() {
 
 #[test]
 fn enables_interrupts() {
-    let mut cpu = init_cpu_with_test_instructions(vec![0xFB, 0x00, 0x00, 0x00]);
-    cpu.step();
-    assert_eq!(cpu.interrupts.enable_delay, 2);
-    assert_eq!(cpu.interrupts.enabled, false);
+    let mut cpu = init_cpu_with_test_instructions(vec![0xFB, 0x00]);
     cpu.step();
     assert_eq!(cpu.interrupts.enable_delay, 1);
     assert_eq!(cpu.interrupts.enabled, false);
@@ -1326,16 +1323,9 @@ fn enables_interrupts() {
 
 #[test]
 fn disables_interrupts() {
-    let mut cpu = init_cpu_with_test_instructions(vec![0xF3, 0x00, 0x00, 0x00]);
+    let mut cpu = init_cpu_with_test_instructions(vec![0xF3]);
     cpu.interrupts.enabled = true;
     cpu.step();
-    assert_eq!(cpu.interrupts.disable_delay, 2);
-    assert_eq!(cpu.interrupts.enabled, true);
-    cpu.step();
-    assert_eq!(cpu.interrupts.disable_delay, 1);
-    assert_eq!(cpu.interrupts.enabled, true);
-    cpu.step();
-    assert_eq!(cpu.interrupts.disable_delay, 0);
     assert_eq!(cpu.interrupts.enabled, false);
 }
 

@@ -3,24 +3,18 @@ use crate::cpu::{Cpu, Register, REGISTER_AF, REGISTER_BC, REGISTER_DE, REGISTER_
 impl Cpu {
     fn emulate_halt_bug(&mut self) {
         // Mimics halt bug behavior, which runs the instruction after HALT twice.
-        if !self.halted && self.halt_bug {
+        if self.halt_bug {
             self.registers.program_counter -= 1;
             self.halt_bug = false;
         }
     }
 
-    fn update_interrupt_flag_after_delay(&mut self) {
+    fn enable_interrupts_after_delay(&mut self) {
         if self.interrupts.enable_delay > 0 {
             if self.interrupts.enable_delay == 1 {
                 self.interrupts.enabled = true;
             }
             self.interrupts.enable_delay -= 1;
-        }
-        else if self.interrupts.disable_delay > 0 {
-            if self.interrupts.disable_delay == 1 {
-                self.interrupts.enabled = false;
-            }
-            self.interrupts.disable_delay -= 1;
         }
     }
 
@@ -44,11 +38,18 @@ impl Cpu {
             self.address_bus.hdma_step();
         }
 
-        self.execute_opcode();
+        if self.halted {
+            self.step_one_machine_cycle();
+        }
+        else {
+            self.execute_opcode();
+        }
 
         self.interrupt_step();
 
-        self.prefetch_next_opcode();
+        if !self.halted {
+            self.prefetch_next_opcode();
+        }
     }
 
     fn execute_opcode(&mut self) {
@@ -58,7 +59,7 @@ impl Cpu {
         let opcode = self.registers.opcode;
 
         self.emulate_halt_bug();
-        self.update_interrupt_flag_after_delay();
+        self.enable_interrupts_after_delay();
 
         match opcode {
             0x00 =>
@@ -393,13 +394,15 @@ impl Cpu {
                 if self.interrupts_fired() {
                     self.halted = false;
 
-                    if !self.interrupts.enabled {
+                    if self.interrupts.enabled {
+                        self.registers.program_counter -= 1;
+                    }
+                    else {
                         self.halt_bug = true;
                     }
                 }
                 else {
                     self.halted = true;
-                    self.registers.program_counter -= 1;
                 }
             },
             0x77 => {
@@ -834,7 +837,7 @@ impl Cpu {
                 self.load_memory_byte_in_destination_register(address, Register::A);
             },
             0xF3 => {
-                self.interrupts.disable_delay = 2;
+                self.interrupts.enabled = false;
             },
             0xF4 =>
                 handle_illegal_opcode(opcode),
@@ -870,7 +873,7 @@ impl Cpu {
                 self.load_memory_byte_in_destination_register(address, Register::A);
             },
             0xFB => {
-                self.interrupts.enable_delay = 2;
+                self.interrupts.enable_delay = 1;
             },
             0xFC =>
                 handle_illegal_opcode(opcode),

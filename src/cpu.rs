@@ -23,7 +23,6 @@ pub struct Registers {
 #[derive(Debug, Serializable, CopyGetters, Setters)]
 pub struct Interrupts {
     enable_delay: u8,
-    disable_delay: u8,
     enabled: bool
 }
 
@@ -100,7 +99,6 @@ impl Cpu {
             halt_bug: false,
             interrupts: Interrupts {
                 enable_delay: 0,
-                disable_delay: 0,
                 enabled: false
             },
             instruction_clock_cycles: 0,

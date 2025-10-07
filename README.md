@@ -108,6 +108,7 @@ This emulator passes the following test suites from Blargg's test ROM collection
 5. [Interrupt timing tests (CGB)](https://github.com/retrio/gb-test-roms/tree/master/interrupt_time)
 6. [APU tests (DMG)](https://github.com/retrio/gb-test-roms/tree/master/dmg_sound)
 7. [APU tests (CGB)](https://github.com/retrio/gb-test-roms/tree/master/cgb_sound)
+8. [Halt bug test](https://github.com/retrio/gb-test-roms/tree/master/halt_bug.gb)
 
 Additionally, this emulator passes all [JSON CPU tests](https://github.com/adtennant/GameboyCPUTests), and
 only some tests from the [Mooneye test ROM collection](https://github.com/Gekkio/mooneye-test-suite).
