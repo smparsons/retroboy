@@ -7,7 +7,7 @@ pub struct SaveStateHeader {
     pub title: String,
 }
 
-pub const MAJOR_VERSION: u8 = 5;
+pub const MAJOR_VERSION: u8 = 6;
 pub const HEADER_IDENTIFIER: &str = "HEADER";
 pub const STATE_IDENTIFIER: &str = "STATE";
 pub const FORMAT_ERROR: &str = "The provided save state file is in an invalid format.";
