@@ -81,6 +81,11 @@ The project uses a custom `Serializable` trait with a derive macro (`tools/seria
 - **Callback-based rendering**: The GPU takes a renderer callback `fn(&[u8])` for frame output
 - **CGB mode**: Toggled via `set_cgb_mode()`, affects memory banking, palettes, and speed switching
 
+## Style Guidelines
+
+- **No comments unless absolutely necessary.** Code should be self-documenting. Use clear naming and structure instead of comments.
+- **Define modules at the bottom of the file**, not the top.
+
 ## Mac SDL Setup
 
 If using Homebrew-installed SDL2, you may need these environment variables:
