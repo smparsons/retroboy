@@ -27,6 +27,10 @@ make sdl-watch ROM=path/to/rom.gb     # Auto-rebuild on changes
 cd frontends/web && yarn install
 cd frontends/web && yarn start        # Dev server
 cd frontends/web && yarn build        # Production build
+
+# Headless frontend (for screenshots and test verification)
+make screenshot ROM=path/to/rom.gb SECONDS=5        # Run and capture screenshot
+make screenshot ROM=path/to/rom.gbc SECONDS=5 CGB=1 # CGB mode
 ```
 
 ## Architecture
@@ -67,6 +71,7 @@ The project uses a custom `Serializable` trait with a derive macro (`tools/seria
 
 - **Web** (`frontends/web/`): React/TypeScript app using Material UI, Web Audio API, and HTML Canvas
 - **SDL** (`frontends/sdl/`): Native test frontend using SDL2 for quick iteration
+- **Headless** (`frontends/headless/`): No-display frontend for running ROMs and capturing screenshots
 - **JSON Test Runner** (`frontends/json_test_runner/`): Runs CPU tests from JSON test suites
 
 ### WASM Bindings (src/wasm/)
@@ -93,3 +98,15 @@ If using Homebrew-installed SDL2, you may need these environment variables:
 export LIBRARY_PATH="/opt/homebrew/lib:$LIBRARY_PATH"
 export CPATH="/opt/homebrew/include:$CPATH"
 ```
+
+## Verifying Emulator Behavior with Test ROMs
+
+Use the headless frontend to run test ROMs (like Blargg's test ROMs) and verify results via screenshots. This is useful for validating emulator correctness after making changes.
+
+```bash
+make screenshot ROM=path/to/test_rom.gb SECONDS=10
+```
+
+Screenshots are saved to `test_screenshots/` with timestamped filenames (e.g., `cpu_instrs_260124_143052.png`). After running, read the screenshot to check if the test passed - test ROMs typically display "Passed" or "Failed" on screen.
+
+Common test ROM locations: `~/development/gameboy-test-roms/`
