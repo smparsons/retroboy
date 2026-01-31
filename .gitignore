@@ -7,3 +7,5 @@ frontends/web/src/core
 frontends/web/build
 .claude/*
 test_screenshots
+tools/mcp/dist/*
+tools/mcp/node_modules/*

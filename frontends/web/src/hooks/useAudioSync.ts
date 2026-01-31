@@ -2,12 +2,29 @@ import { MutableRefObject, useCallback, useEffect, useRef } from "react";
 
 import { stepUntilNextAudioBuffer } from "../core/retroboyCore";
 
+export type FrameCallback = {
+    targetFrame: number;
+    callback: () => void;
+};
+
+export type ScheduleFrameCallback = (
+    framesFromNow: number,
+    callback: () => void,
+) => void;
+
 const useAudioSync = (
     playing: boolean,
     resetGameCallback: () => void,
-): [MutableRefObject<AudioContext | null>, () => void] => {
+): [
+    MutableRefObject<AudioContext | null>,
+    () => void,
+    MutableRefObject<number>,
+    ScheduleFrameCallback,
+] => {
     const audioContextRef = useRef<AudioContext | null>(null);
     const scheduledResetRef = useRef<boolean>(false);
+    const frameCountRef = useRef<number>(0);
+    const frameCallbacksRef = useRef<FrameCallback[]>([]);
 
     const nextPlayTimeRef = useRef<number>(0);
 
@@ -24,13 +41,38 @@ const useAudioSync = (
         }
     };
 
+    const scheduleFrameCallback: ScheduleFrameCallback = useCallback(
+        (framesFromNow: number, callback: () => void) => {
+            const targetFrame = frameCountRef.current + framesFromNow;
+            frameCallbacksRef.current.push({ targetFrame, callback });
+        },
+        [],
+    );
+
+    const processFrameCallbacks = useCallback(() => {
+        const currentFrame = frameCountRef.current;
+        const remaining: FrameCallback[] = [];
+
+        for (const entry of frameCallbacksRef.current) {
+            if (currentFrame >= entry.targetFrame) {
+                entry.callback();
+            } else {
+                remaining.push(entry);
+            }
+        }
+
+        frameCallbacksRef.current = remaining;
+    }, []);
+
     const step = useCallback(() => {
         if (scheduledResetRef.current) {
             resetGame();
         } else if (playing) {
             stepUntilNextAudioBuffer();
+            frameCountRef.current++;
+            processFrameCallbacks();
         }
-    }, [playing]);
+    }, [playing, processFrameCallbacks]);
 
     useEffect(() => {
         if (playing && audioContextRef.current) {
@@ -93,7 +135,7 @@ const useAudioSync = (
         }
     }, [playing]);
 
-    return [audioContextRef, startReset];
+    return [audioContextRef, startReset, frameCountRef, scheduleFrameCallback];
 };
 
 export default useAudioSync;

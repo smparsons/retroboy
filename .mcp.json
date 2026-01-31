@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "retroboy": {
+      "command": "node",
+      "args": ["/Users/samuelparsons/development/retroboy/tools/mcp/dist/index.js"]
+    }
+  }
+}

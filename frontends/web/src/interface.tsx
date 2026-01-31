@@ -16,6 +16,7 @@ import {
 } from "./core/retroboyCore";
 import useAudioSync from "./hooks/useAudioSync";
 import { useKeyListeners } from "./hooks/useKeyListeners";
+import useMcpBridge from "./hooks/useMcpBridge";
 import { useIsMobile } from "./hooks/useResponsiveBreakpoint";
 import { useSettingsStore } from "./hooks/useSettingsStore";
 import { useTopLevelRenderer } from "./hooks/useTopLevelRenderer";
@@ -62,7 +63,12 @@ const Interface = (): JSX.Element => {
         setRom(null);
     };
 
-    const [audioContextRef, startReset] = useAudioSync(playing, resetGame);
+    const [audioContextRef, startReset, , scheduleFrameCallback] = useAudioSync(
+        playing,
+        resetGame,
+    );
+
+    useMcpBridge(playing, gameKey, canvasRef, scheduleFrameCallback);
 
     const scrollToGamePad = ({ smooth }: { smooth: boolean }) => {
         window.scrollTo({
