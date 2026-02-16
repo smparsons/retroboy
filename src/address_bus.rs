@@ -177,6 +177,18 @@ impl AddressBus {
         self.serial.step();
     }
 
+    pub(super) fn trigger_oam_bug_write(&mut self) {
+        self.gpu.trigger_oam_bug_write();
+    }
+
+    pub(super) fn trigger_oam_bug_read(&mut self) {
+        self.gpu.trigger_oam_bug_read();
+    }
+
+    pub(super) fn trigger_oam_bug_mixed(&mut self) {
+        self.gpu.trigger_oam_bug_mixed();
+    }
+
     pub(crate) fn set_cgb_mode(&mut self, value: bool) {
         self.cgb_mode = value;
         self.apu.set_cgb_mode(value);

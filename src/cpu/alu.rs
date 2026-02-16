@@ -163,6 +163,7 @@ impl Cpu {
         let sum = word.wrapping_add(1);
         self.store_in_register_pair(register_pair, sum);
         self.step_one_machine_cycle();
+        self.check_oam_bug_write(word);
     }
 
     pub(super) fn decrement_register_pair(&mut self, register_pair: RegisterPair) {
@@ -170,6 +171,7 @@ impl Cpu {
         let sum = word.wrapping_sub(1);
         self.store_in_register_pair(register_pair, sum);
         self.step_one_machine_cycle();
+        self.check_oam_bug_write(word);
     }
 
     pub(super) fn bcd_adjust(&mut self) {

@@ -165,8 +165,9 @@ impl Cpu {
             0x22 => {
                 let mut address = self.read_from_register_pair(&REGISTER_HL);
                 self.load_source_register_in_memory(Register::A, address);
+                self.check_oam_bug_write(address);
                 address = address.wrapping_add(1);
-                self.store_in_register_pair(REGISTER_HL, address);    
+                self.store_in_register_pair(REGISTER_HL, address);
             },
             0x23 =>
                 self.increment_register_pair(REGISTER_HL),
@@ -185,10 +186,10 @@ impl Cpu {
                 self.add_value_to_register_pair(REGISTER_HL, word);
             },
             0x2A => {
-                let mut address = self.read_from_register_pair(&REGISTER_HL);
+                let address = self.read_from_register_pair(&REGISTER_HL);
                 self.load_memory_byte_in_destination_register(address, Register::A);
-                address += 1;
-                self.store_in_register_pair(REGISTER_HL, address);  
+                self.check_oam_bug_mixed(address);
+                self.store_in_register_pair(REGISTER_HL, address.wrapping_add(1));
             },
             0x2B =>
                 self.decrement_register_pair(REGISTER_HL),
@@ -210,14 +211,16 @@ impl Cpu {
                 self.registers.stack_pointer = word;            
             },
             0x32 => {
-                let mut address = self.read_from_register_pair(&REGISTER_HL);
+                let address = self.read_from_register_pair(&REGISTER_HL);
                 self.load_source_register_in_memory(Register::A, address);
-                address -= 1;
-                self.store_in_register_pair(REGISTER_HL, address);           
+                self.check_oam_bug_write(address);
+                self.store_in_register_pair(REGISTER_HL, address.wrapping_sub(1));
             },
             0x33 => {
-                self.registers.stack_pointer = self.registers.stack_pointer.wrapping_add(1);
+                let sp = self.registers.stack_pointer;
+                self.registers.stack_pointer = sp.wrapping_add(1);
                 self.step_one_machine_cycle();
+                self.check_oam_bug_write(sp);
             },
             0x34 =>
                 self.increment_memory_byte(),
@@ -237,14 +240,16 @@ impl Cpu {
                 self.add_value_to_register_pair(REGISTER_HL, stack_pointer)
             }
             0x3A => {
-                let mut address = self.read_from_register_pair(&REGISTER_HL);
+                let address = self.read_from_register_pair(&REGISTER_HL);
                 self.load_memory_byte_in_destination_register(address, Register::A);
-                address -= 1;
-                self.store_in_register_pair(REGISTER_HL, address);
+                self.check_oam_bug_mixed(address);
+                self.store_in_register_pair(REGISTER_HL, address.wrapping_sub(1));
             },
             0x3B => {
-                self.registers.stack_pointer = self.registers.stack_pointer.wrapping_sub(1);
+                let sp = self.registers.stack_pointer;
+                self.registers.stack_pointer = sp.wrapping_sub(1);
                 self.step_one_machine_cycle();
+                self.check_oam_bug_write(sp);
             },
             0x3C =>
                 self.increment_register(Register::A),

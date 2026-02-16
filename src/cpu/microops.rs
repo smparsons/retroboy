@@ -173,4 +173,26 @@ impl Cpu {
         let value = self.read_from_register(&Register::F);
         (value & 0x10) == 0x10
     }
+
+    fn is_oam_address(&self, address: u16) -> bool {
+        !self.address_bus.processor_test_mode() && address >= 0xFE00 && address <= 0xFEFF
+    }
+
+    pub(super) fn check_oam_bug_write(&mut self, address: u16) {
+        if self.is_oam_address(address) {
+            self.address_bus.trigger_oam_bug_write();
+        }
+    }
+
+    pub(super) fn check_oam_bug_read(&mut self, address: u16) {
+        if self.is_oam_address(address) {
+            self.address_bus.trigger_oam_bug_read();
+        }
+    }
+
+    pub(super) fn check_oam_bug_mixed(&mut self, address: u16) {
+        if self.is_oam_address(address) {
+            self.address_bus.trigger_oam_bug_mixed();
+        }
+    }
 }

@@ -11,6 +11,7 @@ use std::io::{Read, Write};
 
 #[derive(Debug, CopyGetters, Getters, MutGetters, Setters)]
 pub struct Gpu {
+    #[getset(get_copy = "pub(super)")]
     mode: u8,
 
     mode_clock: u16,
@@ -69,7 +70,10 @@ pub struct Gpu {
     stat_interrupt: bool,
     
     #[getset(get_copy = "pub(super)", set = "pub(super)")]
-    vblank_interrupt: bool
+    vblank_interrupt: bool,
+
+    #[getset(get_copy = "pub(super)")]
+    oam_scan_row: u8,
 }
 
 pub struct GpuParams<'a> {
@@ -126,7 +130,8 @@ impl Gpu {
             cgb_double_speed: false,
             renderer,
             stat_interrupt: false,
-            vblank_interrupt: false
+            vblank_interrupt: false,
+            oam_scan_row: 0xFF,
         }
     }
 
@@ -171,7 +176,13 @@ impl Gpu {
 
             match self.mode {
                 OAM_MODE => {
+                    let t_increment = get_t_cycle_increment(self.cgb_double_speed) as u16;
+                    let m_cycle_index = (self.mode_clock / t_increment).wrapping_sub(1);
+                    let oam_search_index = (m_cycle_index * 2) as u8;
+                    self.oam_scan_row = (((oam_search_index & 0xFE) as u16) * 4 + 8) as u8;
+
                     if self.mode_clock >= OAM_TIME {
+                        self.oam_scan_row = 0xFF;
                         self.mode_clock = 0;
                         self.update_mode(VRAM_MODE);
                     }
@@ -202,6 +213,7 @@ impl Gpu {
                         }
                         else {
                             self.update_mode(OAM_MODE);
+                            self.oam_scan_row = 0;
                         }
 
                         self.ly += 1;
@@ -219,6 +231,7 @@ impl Gpu {
                             self.ly = 0;
                             self.wly = 0;
                             self.update_mode(OAM_MODE);
+                            self.oam_scan_row = 0;
                         }
 
                         self.compare_ly_and_lyc();
@@ -284,15 +297,26 @@ impl Gpu {
     }
 
     pub(super) fn set_lcdc(&mut self, value: u8) {
+        let was_enabled = get_lcd_enabled_mode(self.lcdc);
         self.lcdc = value;
-        let lcd_enabled = get_lcd_enabled_mode(value);
-        if !lcd_enabled {
-            self.ly = 0;
-            self.wly = 0;
-            self.mode_clock = 0;
-            self.mode = HBLANK_MODE;
-            self.stat = (self.stat & 0b11111100) | HBLANK_MODE;
-            self.frame_buffer = initialize_blank_frame();
+        let is_enabled = get_lcd_enabled_mode(value);
+
+        match (was_enabled, is_enabled) {
+            (_, false) => {
+                self.ly = 0;
+                self.wly = 0;
+                self.mode_clock = 0;
+                self.mode = HBLANK_MODE;
+                self.stat = (self.stat & 0b11111100) | HBLANK_MODE;
+                self.oam_scan_row = 0xFF;
+                self.frame_buffer = initialize_blank_frame();
+            }
+            (false, true) => {
+                self.mode_clock = 4;
+                self.update_mode(OAM_MODE);
+                self.oam_scan_row = 8;
+            }
+            (true, true) => {}
         }
     }
     
@@ -380,6 +404,7 @@ impl Serializable for Gpu {
         self.object_attribute_memory.serialize(writer)?;
         self.cgb_mode.serialize(writer)?;
         self.cgb_double_speed.serialize(writer)?;
+        self.oam_scan_row.serialize(writer)?;
         Ok(())
     }
 
@@ -402,7 +427,8 @@ impl Serializable for Gpu {
         self.object_attribute_memory.deserialize(reader)?;
         self.cgb_mode.deserialize(reader)?;
         self.cgb_double_speed.deserialize(reader)?;
-    
+        self.oam_scan_row.deserialize(reader)?;
+
         self.frame_buffer = initialize_blank_frame();
 
         Ok(())
@@ -421,3 +447,4 @@ mod prioritization;
 mod scanline;
 mod sprites;
 mod utils;
+mod oam_bug;
