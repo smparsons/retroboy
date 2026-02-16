@@ -99,16 +99,7 @@ The control mappings for the test app are as follows:
 
 ## Test ROMs
 
-This emulator passes the following test suites from Blargg's test ROM collection:
-
-1. [CPU instruction tests](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs)
-2. [CPU instruction timing tests](https://github.com/retrio/gb-test-roms/tree/master/instr_timing)
-3. [Memory timing tests](https://github.com/retrio/gb-test-roms/tree/master/mem_timing)
-4. [Memory timing tests 2](https://github.com/retrio/gb-test-roms/tree/master/mem_timing-2)
-5. [Interrupt timing tests (CGB)](https://github.com/retrio/gb-test-roms/tree/master/interrupt_time)
-6. [APU tests (DMG)](https://github.com/retrio/gb-test-roms/tree/master/dmg_sound)
-7. [APU tests (CGB)](https://github.com/retrio/gb-test-roms/tree/master/cgb_sound)
-8. [Halt bug test](https://github.com/retrio/gb-test-roms/tree/master/halt_bug.gb)
+This emulator passes all of [Blargg's tests](https://github.com/retrio/gb-test-roms).
 
 Additionally, this emulator passes all [JSON CPU tests](https://github.com/adtennant/GameboyCPUTests), and
 only some tests from the [Mooneye test ROM collection](https://github.com/Gekkio/mooneye-test-suite).
