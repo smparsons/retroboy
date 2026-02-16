@@ -1,4 +1,4 @@
-use super::Gpu;
+use crate::gpu::Gpu;
 
 impl Gpu {
     fn should_trigger_oam_bug(&self, min_row: usize) -> bool {
